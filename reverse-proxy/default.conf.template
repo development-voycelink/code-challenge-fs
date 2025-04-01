@@ -1,0 +1,12 @@
+upstream api-gateway {
+  server api-gateway:${API_GATEWAY_PORT};
+}
+
+server {
+  listen 80;
+
+  location /api {
+    rewrite /api/(.*) /$1 break;
+    proxy_pass http://api-gateway;
+  }
+}

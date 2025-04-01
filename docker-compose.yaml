@@ -1,0 +1,115 @@
+volumes:
+  call_service_postgres:
+  queue_service_postgres:
+  rabbitmq_data:
+
+services:
+  reverse-proxy:
+    build: ./reverse-proxy
+    environment:
+      API_GATEWAY_PORT: ${API_GATEWAY_PORT}
+    ports:
+      - 80:80
+    restart: always
+    depends_on:
+      - api-gateway
+
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      target: development
+      args:
+        - NODE_VERSION=${NODE_VERSION}
+    environment:
+      - PORT=${API_GATEWAY_PORT}
+      - API_KEY=${API_KEY}
+    expose:
+      - ${API_GATEWAY_PORT}
+    volumes:
+      - ./backend/api-gateway:/usr/share/app
+      - /usr/share/app/node_modules
+    restart: on-failure
+    depends_on:
+      - call-service
+    command: npm run start:dev
+
+  call-service:
+    build:
+      context: ./backend/microservices/call-service
+      target: development
+      args:
+        - NODE_VERSION=${NODE_VERSION}
+    environment:
+      - PORT=${CALL_SERVICE_PORT}
+    expose:
+      - ${CALL_SERVICE_PORT}
+    volumes:
+      - ./backend/microservices/call-service:/usr/share/app
+      - /usr/share/app/node_modules
+    restart: on-failure
+    depends_on:
+      call-service-write-db:
+        condition: service_healthy
+    command: npm run start:dev
+
+  call-service-write-db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER_CALL_SERVICE}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_CALL_SERVICE}
+      - POSTGRES_DB=${POSTGRES_DB_CALL_SERVICE}
+    volumes:
+      - call_service_postgres:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT_LOCAL_CALL_SERVICE}:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+
+  queue-service:
+    build:
+      context: ./backend/microservices/queue-service
+      target: development
+      args:
+        - NODE_VERSION=${NODE_VERSION}
+    environment:
+      - PORT=${QUEUE_SERVICE_PORT}
+    expose:
+      - ${QUEUE_SERVICE_PORT}
+    volumes:
+      - ./backend/microservices/queue-service:/usr/share/app
+      - /usr/share/app/node_modules
+    restart: on-failure
+    depends_on:
+      queue-service-db:
+        condition: service_healthy
+    command: npm run start:dev
+
+  queue-service-db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER_QUEUE_SERVICE}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_QUEUE_SERVICE}
+      - POSTGRES_DB=${POSTGRES_DB_QUEUE_SERVICE}
+    volumes:
+      - queue_service_postgres:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT_LOCAL_QUEUE_SERVICE}:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq

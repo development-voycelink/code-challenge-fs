@@ -112,8 +112,9 @@ Focus on **extensibility** (e.g., how this module would integrate with CRM/queui
 ### Setup instructions
 
 1. Git pull
-2. docker compose up -d
-3. Ingest events via the `/api/events` endpoint
+2. cp `.env.example` `.env`
+3. docker compose up -d
+4. Ingest events via the `/api/events` endpoint
 
 Sample request:
 

@@ -1,0 +1,1 @@
+export const validQueues = ['medical_spanish', 'medical_english', 'tech_support'];

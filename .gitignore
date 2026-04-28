@@ -1,0 +1,11 @@
+node_modules/
+.next/
+dist/
+*.tsbuildinfo
+CLAUDE.md
+
+# env files (keep examples)
+.env
+.env.local
+!.env.example
+!.env.local.example

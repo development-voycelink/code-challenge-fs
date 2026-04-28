@@ -1,0 +1,37 @@
+import { Server as HttpServer } from 'http';
+import { Server } from 'socket.io';
+import { ServerToClientEvents, ClientToServerEvents, CallStatusUpdate } from '../types';
+
+type IoServer = Server<ClientToServerEvents, ServerToClientEvents>;
+
+let io: IoServer;
+
+export function createSocketServer(httpServer: HttpServer): IoServer {
+  io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
+    cors: { origin: '*' },
+  });
+
+  io.on('connection', (socket) => {
+    console.log(`[ws] client connected    ${socket.id}`);
+
+    socket.on('subscribe_call', (_callId) => {
+      // TODO: socket.join(_callId);
+    });
+
+    socket.on('unsubscribe_call', (_callId) => {
+      // TODO: socket.leave(_callId);
+    });
+
+    socket.on('disconnect', () => {
+      console.log(`[ws] client disconnected ${socket.id}`);
+    });
+  });
+
+  return io;
+}
+
+export function broadcastStatusUpdate(update: CallStatusUpdate): void {
+  if (!io) return;
+  // TODO: io.to(update.callId).emit('call_status_update', update);
+  io.emit('call_status_update', update); // naive – replace with room-based
+}

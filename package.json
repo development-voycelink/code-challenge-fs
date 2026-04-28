@@ -1,0 +1,26 @@
+{
+  "name": "voycelink-challenge",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently --names \"frontend,call-service,realtime-service\" --prefix-colors \"cyan,yellow,green\" \"npm run dev --workspace=packages/frontend\" \"npm run dev --workspace=packages/call-service\" \"npm run dev --workspace=packages/realtime-service\"",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint packages --ext .js,.ts,.tsx",
+    "test": "npm run test --workspaces --if-present",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "setup": "npm install && docker compose up -d"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35"
+  }
+}

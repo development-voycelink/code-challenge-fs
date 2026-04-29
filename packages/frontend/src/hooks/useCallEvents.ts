@@ -1,13 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { CallEvent } from '../types';
-import { MOCK_EVENTS } from '../mocks/data';
+import { useEffect, useState } from "react";
+import { CallEvent } from "../types";
+import { fetchCallEvents } from "../lib/api";
+import { getSocket, subscribeToCall, unsubscribeFromCall } from "../lib/socket";
 
-/**
- * Returns the event history for a specific call.
- * TODO: replace mock data with a real API call.
- */
 export function useCallEvents(callId: string | null) {
   const [events, setEvents] = useState<CallEvent[]>([]);
   const [loading, setLoading] = useState(false);
@@ -18,14 +15,41 @@ export function useCallEvents(callId: string | null) {
       return;
     }
 
+    let cancelled = false;
     setLoading(true);
-    // TODO: replace with fetchCallEvents(callId)
-    const t = setTimeout(() => {
-      setEvents(MOCK_EVENTS[callId] ?? []);
-      setLoading(false);
-    }, 200);
 
-    return () => clearTimeout(t);
+    fetchCallEvents(callId)
+      .then((data) => {
+        if (!cancelled) setEvents(data);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [callId]);
+
+  useEffect(() => {
+    if (!callId) return;
+
+    const socket = getSocket();
+    const onUpdate = (update: { callId: string }) => {
+      if (update.callId !== callId) return;
+      fetchCallEvents(callId)
+        .then(setEvents)
+        .catch(() => {});
+    };
+
+    if (!socket.connected) socket.connect();
+    subscribeToCall(callId);
+    socket.on("call_status_update", onUpdate);
+
+    return () => {
+      socket.off("call_status_update", onUpdate);
+      unsubscribeFromCall(callId);
+    };
   }, [callId]);
 
   return { events, loading };

@@ -1,26 +1,63 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Call, CallFilters } from '../types';
-import { MOCK_CALLS } from '../mocks/data';
+import { useEffect, useRef, useState } from "react";
+import { Call, CallFilters } from "../types";
+import { fetchCalls } from "../lib/api";
+import { getSocket } from "../lib/socket";
 
-/**
- * Returns the live call list and a loading indicator.
- * TODO: replace mock data with real API + Socket.io updates.
- */
-export function useCalls(_filters: CallFilters) {
+export function useCalls(filters: CallFilters) {
   const [calls, setCalls] = useState<Call[]>([]);
   const [loading, setLoading] = useState(true);
+  const [connected, setConnected] = useState(false);
+  const mounted = useRef(true);
 
   useEffect(() => {
-    // TODO: replace with fetchCalls(_filters) + socket subscription
-    const t = setTimeout(() => {
-      setCalls(MOCK_CALLS);
-      setLoading(false);
-    }, 300);
-
-    return () => clearTimeout(t);
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
   }, []);
 
-  return { calls, loading, setCalls };
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    fetchCalls(filters)
+      .then((data) => {
+        if (!cancelled && mounted.current) setCalls(data);
+      })
+      .finally(() => {
+        if (!cancelled && mounted.current) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filters.status, filters.queueId]);
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    const onConnect = () => setConnected(true);
+    const onDisconnect = () => setConnected(false);
+    const onUpdate = () => {
+      fetchCalls(filters)
+        .then(setCalls)
+        .catch(() => {});
+    };
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("call_status_update", onUpdate);
+
+    if (!socket.connected) socket.connect();
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("call_status_update", onUpdate);
+    };
+  }, [filters.status, filters.queueId]);
+
+  return { calls, loading, connected, setCalls };
 }

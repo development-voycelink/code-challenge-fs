@@ -1,21 +1,21 @@
-import type { QueueId } from '@voycelink/contracts';
-import { Call, CallEvent } from '../domain/call';
+import type { QueueId } from "@voycelink/contracts";
+import { Call, CallEvent } from "../domain/call";
 
 export interface CallRow {
-  id: string;
-  type: Call['type'];
-  status: Call['status'];
-  queue_id: QueueId;
-  start_time: Date;
-  end_time: Date | null;
+  id: Call["id"];
+  type: Call["type"];
+  status: Call["status"];
+  queue_id: Call["queueId"];
+  start_time: Call["startTime"];
+  end_time: Call["endTime"] | null;
 }
 
 export interface CallEventRow {
-  id: string;
-  call_id: string;
-  type: string;
-  timestamp: Date;
-  metadata: Record<string, unknown> | null;
+  id: CallEvent["id"];
+  call_id: CallEvent["callId"];
+  type: CallEvent["type"];
+  timestamp: CallEvent["timestamp"];
+  metadata: CallEvent["metadata"] | null;
 }
 
 export function mapCallRow(row: CallRow): Call {

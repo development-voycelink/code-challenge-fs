@@ -42,6 +42,13 @@ export class CallEvent {
   ) {}
 }
 
+export class CallNotFoundError extends Error {
+  constructor(callId: string) {
+    super(`Call not found: ${callId}`);
+    this.name = "CallNotFoundError";
+  }
+}
+
 export interface CallServiceContract {
   processEvent(payload: EventPayload): Promise<CallEvent>;
   getCalls(filters: CallFilters): Promise<Call[]>;

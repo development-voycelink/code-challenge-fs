@@ -16,6 +16,7 @@ import {
   Call,
   CallEvent,
   CallFilters,
+  CallNotFoundError,
   CallServiceContract,
   EventPayload,
   CallStatus,
@@ -105,7 +106,7 @@ export class CallService implements CallServiceContract {
       if (event !== CALL_INITIATED) {
         const existing = await this.getCallById(client, callId);
         if (existing.rowCount === EMPTY_ROW_COUNT) {
-          throw new Error(`Call not found: ${callId}`);
+          throw new CallNotFoundError(callId);
         }
       }
 

@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CallNotFoundError } from '../domain/call';
 
 const processEventMock = vi.fn();
 
@@ -76,5 +77,22 @@ describe('POST /api/events', () => {
     expect(response.status).toBe(401);
     expect(response.body).toEqual({ message: 'Unauthorized' });
     expect(processEventMock).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 when the call does not exist', async () => {
+    processEventMock.mockRejectedValueOnce(new CallNotFoundError('missing-call'));
+
+    const response = await request(app)
+      .post('/api/events')
+      .set('X-API-Key', 'change-me')
+      .send({
+        event: 'call_ended',
+        callId: 'missing-call',
+        endReason: 'completed',
+        duration: 90,
+      });
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({ message: 'Call not found' });
   });
 });

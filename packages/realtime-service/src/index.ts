@@ -2,6 +2,7 @@ import 'dotenv/config';
 import http from 'http';
 import express from 'express';
 import cors from 'cors';
+import morgan from 'morgan';
 import { createSocketServer, broadcastStatusUpdate } from './socket/server';
 import { subscribeToCallUpdates } from './bus/subscriber';
 
@@ -11,6 +12,7 @@ const PORT = process.env.PORT ?? 3002;
 
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 

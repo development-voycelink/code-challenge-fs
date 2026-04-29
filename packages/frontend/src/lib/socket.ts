@@ -24,4 +24,12 @@ export function unsubscribeFromCall(callId: string): void {
   getSocket().emit('unsubscribe_call', callId);
 }
 
+export function subscribeToDashboard(): void {
+  getSocket().emit('subscribe_dashboard');
+}
+
+export function unsubscribeFromDashboard(): void {
+  getSocket().emit('unsubscribe_dashboard');
+}
+
 export type { CallStatusUpdate };

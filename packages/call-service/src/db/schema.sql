@@ -21,3 +21,19 @@ CREATE TABLE IF NOT EXISTS call_events (
 CREATE INDEX IF NOT EXISTS idx_call_events_call_id ON call_events(call_id);
 CREATE INDEX IF NOT EXISTS idx_calls_status        ON calls(status);
 CREATE INDEX IF NOT EXISTS idx_calls_queue_id      ON calls(queue_id);
+
+CREATE TABLE IF NOT EXISTS idempotency_keys (
+  key        VARCHAR(100) PRIMARY KEY,
+  event_id   VARCHAR(36) NOT NULL REFERENCES call_events(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS outbox_events (
+  id         SERIAL PRIMARY KEY,
+  call_id    VARCHAR(36) NOT NULL,
+  status     VARCHAR(20) NOT NULL,
+  event_type VARCHAR(50) NOT NULL,
+  timestamp  TIMESTAMPTZ NOT NULL,
+  metadata   JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

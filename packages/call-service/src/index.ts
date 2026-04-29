@@ -1,13 +1,18 @@
 import { config } from './config';
 import express from 'express';
 import cors from 'cors';
+import morgan from 'morgan';
 import eventsRouter from './routes/events';
 import callsRouter from './routes/calls';
+import { outboxProcessor } from './bus/OutboxProcessor';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
+
+outboxProcessor.start(); // Start background publisher
 
 app.use('/api/events', eventsRouter);
 app.use('/api/calls', callsRouter);

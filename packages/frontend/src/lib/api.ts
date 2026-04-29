@@ -5,7 +5,6 @@ const BASE_URL =
 
 /**
  * Fetch the current call list from call-service.
- * TODO: call this from the `useCalls` hook.
  */
 export async function fetchCalls(params?: CallFilters): Promise<Call[]> {
   const queryParams = new URLSearchParams();
@@ -27,7 +26,6 @@ export async function fetchCalls(params?: CallFilters): Promise<Call[]> {
 
 /**
  * Fetch event history for a specific call.
- * TODO: call this from the `useCallEvents` hook.
  */
 export async function fetchCallEvents(callId: string): Promise<CallEvent[]> {
   const res = await fetch(`${BASE_URL}/api/calls/${callId}/events`, {

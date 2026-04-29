@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Call } from '../types';
 import { StatusBadge } from './StatusBadge';
 
@@ -14,6 +15,22 @@ function elapsed(start: string, end?: string): string {
   const ms = (end ? new Date(end) : new Date()).getTime() - new Date(start).getTime();
   const s = Math.floor(ms / 1000);
   return `${Math.floor(s / 60)}m ${s % 60}s`;
+}
+
+function LiveDuration({ start, end }: { start: string; end?: string }) {
+  const [, tick] = useState(0);
+
+  useEffect(() => {
+    if (end) return;
+
+    const timer = setInterval(() => {
+      tick(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [end]);
+
+  return <>{elapsed(start, end || new Date().toISOString())}</>;
 }
 
 function timeOf(iso: string): string {
@@ -55,9 +72,8 @@ export function CallsTable({ calls, selectedCallId, onSelectCall, loading }: Pro
             <tr
               key={call.id}
               onClick={() => onSelectCall(call.id)}
-              className={`cursor-pointer transition-colors hover:bg-blue-50 ${
-                selectedCallId === call.id ? 'bg-blue-50' : ''
-              }`}
+              className={`cursor-pointer transition-colors hover:bg-blue-50 ${selectedCallId === call.id ? 'bg-blue-50' : ''
+                }`}
             >
               <td className="px-4 py-3 font-mono text-gray-700">{call.id}</td>
               <td className="px-4 py-3 capitalize text-gray-600">{call.type}</td>
@@ -66,7 +82,7 @@ export function CallsTable({ calls, selectedCallId, onSelectCall, loading }: Pro
                 <StatusBadge status={call.status} />
               </td>
               <td className="px-4 py-3 text-gray-600">
-                {elapsed(call.startTime, call.endTime)}
+                <LiveDuration start={call.startTime} end={call.endTime} />
               </td>
               <td className="px-4 py-3 text-gray-500">{timeOf(call.startTime)}</td>
             </tr>

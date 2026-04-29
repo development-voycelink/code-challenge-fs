@@ -7,20 +7,28 @@ const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const filters: CallFilters = {
+    const filters: CallFilters & { limit?: number; offset?: number } = {
       status:
-        typeof req.query.status === 'string'
+        typeof req.query.status === 'string' && req.query.status !== 'all'
           ? (req.query.status as CallStatus)
           : undefined,
       queueId:
         typeof req.query.queueId === 'string'
           ? (req.query.queueId as QueueId)
           : undefined,
+      limit:
+        typeof req.query.limit === 'string'
+          ? parseInt(req.query.limit, 10)
+          : undefined,
+      offset:
+        typeof req.query.offset === 'string'
+          ? parseInt(req.query.offset, 10)
+          : undefined,
     };
-
     const calls = await callService.getCalls(filters);
     res.json(calls);
-  } catch (_error) {
+  } catch (error) {
+    console.error('Error fetching calls:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

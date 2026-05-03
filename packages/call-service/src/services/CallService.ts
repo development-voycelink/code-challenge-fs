@@ -39,6 +39,21 @@ export class CallService implements CallServiceContract {
       }
     }
 
+    if(_payload.event === 'call_ended'){
+      const {duration} = _payload;
+
+      const callResult = await db.query(
+        `SELECT * FROM calls WHERE id = $1`, [callId]
+      );
+      if(callResult.rowCount === 0) throw new Error(`Call with ID ${callId} not found`);
+      const call = callResult.rows[0];
+      if(call.status !== 'active' && call.status !== 'on_hold') throw new Error(`Invalid state transition from ${call.status}`);
+      await db.query(`UPDATE calls set status = 'ended', end_time = NOW() WHERE id = $1`, [callId]);
+      if(duration < 10){
+        metadata ={..._payload, flag:'SHORT_CALL'};
+      }
+    }
+
     const result = await db.query(
       `INSERT INTO call_events (id, call_id, type, metadata)
       VALUES ($1, $2, $3, $4) RETURNING *`,

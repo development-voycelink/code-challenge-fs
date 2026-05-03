@@ -9,6 +9,16 @@ import { db } from '../db/client';
 import {v4 as uuidv4} from 'uuid'; 
 import { callHoldPayloadSchema } from '@voycelink/contracts';
 
+function mapCallEvent(row: any) {
+  return {
+    id: row.id,
+    callId: row.call_id,
+    type: row.type,
+    timestamp: row.timestamp,
+    metadata: row.metadata,
+  };
+}
+
 export class CallService implements CallServiceContract {
   async processEvent(_payload: EventPayload): Promise<CallEvent> {
     const { callId } = _payload;
@@ -76,8 +86,9 @@ export class CallService implements CallServiceContract {
       ]
     );
 
-    return result.rows[0];
+    return mapCallEvent(result.rows[0]);
   }
+  
 
   async getCalls(_filters: CallFilters): Promise<Call[]> {
     let query = 'SELECT * FROM calls';
@@ -101,7 +112,9 @@ export class CallService implements CallServiceContract {
     return result.rows;
   }
 
-  async getCallEvents(_callId: string): Promise<CallEvent[]> {
-    throw new Error('CallService.getCallEvents not implemented');
+  async getCallEvents(callId: string): Promise<CallEvent[]> {
+    const result = await db.query(
+      `SELECT * FROM call_events WHERE call_id = $1 ORDER BY timestamp ASC`,[callId]);
+    return result.rows;
   }
 }

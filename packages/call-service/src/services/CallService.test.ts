@@ -3,7 +3,7 @@ import { CallService } from './CallService';
 import { db } from '../db/client';
 
 describe('CallService', () => {
-    const service = new CallService();
+  const service = new CallService();
 
   beforeEach(async () => {
     await db.query('DELETE FROM call_events');
@@ -24,7 +24,6 @@ describe('CallService', () => {
     expect(result.rows[0].status).toBe('waiting');
   }); 
 
-
     it('processes call_answered and updates call status to active', async () => {
     await service.processEvent({
       event: 'call_initiated',
@@ -42,7 +41,6 @@ describe('CallService', () => {
 
     expect(result.rows[0].status).toBe('active');
   });
-
 
     it('flags call_answered when waitTime exceeds 30 seconds', async () => {
     await service.processEvent({
@@ -105,4 +103,22 @@ describe('CallService', () => {
 
     expect(event.metadata?.flag).toBe('SHORT_CALL');
   });
+
+  it('returns ordered events for a call', async () => {
+  await service.processEvent({
+    event: 'call_initiated',
+    callId: 'test-events',
+    type: 'voice',
+    queueId: 'medical_spanish',
+  });
+  await service.processEvent({
+    event: 'call_answered',
+    callId: 'test-events',
+    waitTime: 5,
+  });
+  const events = await service.getCallEvents('test-events');
+  expect(events.length).toBe(2);
+  expect(events[0].type).toBe('call_initiated');
+  expect(events[1].type).toBe('call_answered');
+});
 });

@@ -12,15 +12,14 @@ router.post('/', apiKeyAuth, async (req: Request, res: Response) => {
     const payload: EventPayload = eventPayloadSchema.parse(req.body);
     const event = await callService.processEvent(payload);
     res.status(201).json(event);
-  } catch (error) {
-    if (error instanceof ZodError) {
-      res.status(400).json({
+  }  catch (error: any) {
+    if (error?.name === 'ZodError') {
+      return res.status(400).json({
         message: 'Invalid event payload',
         issues: error.issues,
       });
-      return;
     }
-
+    console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

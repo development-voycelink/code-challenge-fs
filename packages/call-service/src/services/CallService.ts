@@ -82,7 +82,25 @@ export class CallService implements CallServiceContract {
   }
 
   async getCalls(_filters: CallFilters): Promise<Call[]> {
-    throw new Error('CallService.getCalls not implemented');
+    let query = 'SELECT * FROM calls';
+    const conditions: string[] =[];
+    const values: any[] = [];
+    if(_filters.status){
+      values.push(_filters.status);
+      conditions.push(`status = ${values.length}`);
+    }
+
+    if(_filters.queueId){
+      values.push(_filters.queueId);
+      conditions.push(`queue_id = ${values.length}`);
+    }
+
+    if(conditions.length > 0){
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+    query += ' ORDER BY start_time DESC';
+    const result = await db.query(query, values);
+    return result.rows;
   }
 
   async getCallEvents(_callId: string): Promise<CallEvent[]> {

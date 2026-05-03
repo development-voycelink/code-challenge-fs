@@ -6,14 +6,13 @@ import {
   EventPayload,
 } from '../domain/call';
 import { db } from '../db/client';
-import {v4 as uuidv4} from 'uuid';
-import { Result } from 'pg';
+import {v4 as uuidv4} from 'uuid'; 
 import { callHoldPayloadSchema } from '@voycelink/contracts';
 
 export class CallService implements CallServiceContract {
   async processEvent(_payload: EventPayload): Promise<CallEvent> {
     const { callId } = _payload;
-    let metadata: Record<string, unknown> = {..._payload}
+    let metadata: Record<string, unknown> | undefined = { ..._payload };
     if (_payload.event === 'call_initiated') {
       const { type, queueId } = _payload;
       await db.query(
@@ -30,13 +29,12 @@ export class CallService implements CallServiceContract {
         'SELECT * FROM calls WHERE ID = $1', [callId]
       );
 
-      if(callResult.rowCount === 0) throw new Error(`Call with ID ${callId} not found`);
+      if(callResult.rowCount === 0) {throw new Error(`Call with ID ${callId} not found`);}
       const call = callResult.rows[0];
-      if(call.status !== 'waiting') throw new Error(`Invalid state transition from ${call.status} to active`);
-      await db.query(`UPDATE  calls SET status = 'active' WHERE ID = $1`, [callId]);
+      if(call.status !== 'waiting') {throw new Error(`Invalid state transition from ${call.status} to active`);}
+      await db.query(`UPDATE  calls SET status = 'active' WHERE id = $1`, [callId]);
       if(waitTime > 30) {
-        metadata = {..._payload, flag: 'WAIT_TIME_EXCEEDED'};
-        const result = await db.query(`INSERT INTO call_events (id, call_id, type, metadata) VALUES ($1,$2,$3,$4) RETURNING *`, [uuidv4(), callId, _payload.event, metadata]);
+        metadata = {..._payload, flag: 'WAIT_TIME_EXCEEDED'}; 
       }
     }
 
@@ -48,7 +46,7 @@ export class CallService implements CallServiceContract {
       if(call.status !== 'active') throw new Error(`Invalid state transmition from ${call.status}`);
       await db.query("UPDATE calls SET status = 'on_hold' WHERE id = $1", [callId]);
       if(holdDuration > 60){
-        metadata ={..._payload, flag: 'HOLD_ON_EXCCCEDED'};
+        metadata ={..._payload, flag: 'HOLD_TIME_EXCEEDED'};
       }
     }
 
@@ -74,7 +72,7 @@ export class CallService implements CallServiceContract {
         uuidv4(),
         callId,
         _payload.event,
-        _payload
+        metadata 
       ]
     );
 

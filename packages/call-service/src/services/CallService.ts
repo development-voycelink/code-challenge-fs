@@ -7,6 +7,7 @@ import {
 } from '../domain/call';
 import { db } from '../db/client';
 import {v4 as uuidv4} from 'uuid'; 
+import { redis } from '../lib/redis';
 import { callHoldPayloadSchema } from '@voycelink/contracts';
 
 function mapCallEvent(row: any) {
@@ -86,7 +87,14 @@ export class CallService implements CallServiceContract {
       ]
     );
 
-    return mapCallEvent(result.rows[0]);
+    const event =  mapCallEvent(result.rows[0]);
+    try {
+      await redis.publish('call_events', JSON.stringify(event));
+    } catch (error) {
+      console.error('Redis publish failed:', error);
+    }
+
+    return event;
   }
   
 

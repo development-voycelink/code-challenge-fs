@@ -8,6 +8,7 @@ import {
 import { db } from '../db/client';
 import {v4 as uuidv4} from 'uuid';
 import { Result } from 'pg';
+import { callHoldPayloadSchema } from '@voycelink/contracts';
 
 export class CallService implements CallServiceContract {
   async processEvent(_payload: EventPayload): Promise<CallEvent> {
@@ -36,6 +37,18 @@ export class CallService implements CallServiceContract {
       if(waitTime > 30) {
         metadata = {..._payload, flag: 'WAIT_TIME_EXCEEDED'};
         const result = await db.query(`INSERT INTO call_events (id, call_id, type, metadata) VALUES ($1,$2,$3,$4) RETURNING *`, [uuidv4(), callId, _payload.event, metadata]);
+      }
+    }
+
+    if(_payload.event === 'call_hold'){
+      const { holdDuration } = _payload;
+      const callResult = await db.query('SELECT * FROM calls WHERE id = $1', [callId]);
+      if(callResult.rowCount === 0) throw new Error(`call ${callId} not found`);
+      const call = callResult.rows[0];
+      if(call.status !== 'active') throw new Error(`Invalid state transmition from ${call.status}`);
+      await db.query("UPDATE calls SET status = 'on_hold' WHERE id = $1", [callId]);
+      if(holdDuration > 60){
+        metadata ={..._payload, flag: 'HOLD_ON_EXCCCEDED'};
       }
     }
 

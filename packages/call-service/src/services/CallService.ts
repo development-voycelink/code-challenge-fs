@@ -5,10 +5,36 @@ import {
   CallServiceContract,
   EventPayload,
 } from '../domain/call';
+import { db } from '../db/client';
+import {v4 as uuidv4} from 'uuid';
+import { Result } from 'pg';
 
 export class CallService implements CallServiceContract {
   async processEvent(_payload: EventPayload): Promise<CallEvent> {
-    throw new Error('CallService.processEvent not implemented');
+    const { callId } = _payload;
+  
+    if (_payload.event === 'call_initiated') {
+      const { type, queueId } = _payload;
+      await db.query(
+        `INSERT INTO calls (id, type, status, queue_id)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (id) DO NOTHING`,
+        [callId, type, 'waiting', queueId]
+      );
+    }
+
+    const result = await db.query(
+      `INSERT INTO call_events (id, call_id, type, metadata)
+      VALUES ($1, $2, $3, $4) RETURNING *`,
+      [
+        uuidv4(),
+        callId,
+        _payload.event,
+        _payload
+      ]
+    );
+
+    return result.rows[0];
   }
 
   async getCalls(_filters: CallFilters): Promise<Call[]> {

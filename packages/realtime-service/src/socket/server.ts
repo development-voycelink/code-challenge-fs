@@ -12,7 +12,7 @@ export function createSocketServer(httpServer: HttpServer): IoServer {
   });
 
   io.on('connection', (socket) => {
-    console.log(`[ws] client connected    ${socket.id}`);
+    console.log(`[ws] client connected ${socket.id}`);
 
     socket.on('subscribe_call', (_callId) => {
           socket.join(_callId);

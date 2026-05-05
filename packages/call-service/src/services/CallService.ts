@@ -88,8 +88,14 @@ export class CallService implements CallServiceContract {
     );
 
     const event =  mapCallEvent(result.rows[0]);
+
+    const enrichedEvent = {
+      ...event,
+      event: _payload.event
+    };
+    
     try {
-      await redis.publish('call_events', JSON.stringify(event));
+      await redis.publish('call_events', JSON.stringify(enrichedEvent));
     } catch (error) {
       console.error('Redis publish failed:', error);
     }

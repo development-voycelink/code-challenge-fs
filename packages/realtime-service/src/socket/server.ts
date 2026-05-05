@@ -15,11 +15,13 @@ export function createSocketServer(httpServer: HttpServer): IoServer {
     console.log(`[ws] client connected    ${socket.id}`);
 
     socket.on('subscribe_call', (_callId) => {
-      // TODO: socket.join(_callId);
+          socket.join(_callId);
+      console.log(`[ws] joined room ${_callId}`);
     });
 
     socket.on('unsubscribe_call', (_callId) => {
-      // TODO: socket.leave(_callId);
+          socket.leave(_callId);
+        console.log(`[ws] left room ${_callId}`);
     });
 
     socket.on('disconnect', () => {
@@ -32,6 +34,5 @@ export function createSocketServer(httpServer: HttpServer): IoServer {
 
 export function broadcastStatusUpdate(update: CallStatusUpdate): void {
   if (!io) return;
-  // TODO: io.to(update.callId).emit('call_status_update', update);
-  io.emit('call_status_update', update); // naive – replace with room-based
+  io.to(update.callId).emit('call_status_update', update);
 }

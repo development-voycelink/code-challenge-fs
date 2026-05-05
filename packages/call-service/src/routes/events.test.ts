@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import type { CallInitiatedPayload } from '@voycelink/contracts';
 import {db} from "../db/client";
+import {createServer} from "../index";
 
 // Mock the database module
 vi.mock('../db/client', () => ({

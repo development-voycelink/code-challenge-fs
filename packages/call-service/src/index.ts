@@ -14,6 +14,10 @@ app.use('/api/calls', callsRouter);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-app.listen(config.port, () => {
-  console.log(`call-service  →  http://localhost:${config.port}`);
-});
+export const createServer = () => app;
+
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(config.port, () => {
+    console.log(`call-service  →  http://localhost:${config.port}`);
+  });
+}

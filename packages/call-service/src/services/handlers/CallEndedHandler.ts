@@ -5,6 +5,7 @@ import { CallRepository } from '../../db/callRepository';
 import { v4 as uuidv4 } from 'uuid';
 import { publishStatusUpdate } from '../../bus/publisher';
 import {
+  CALL_STATUS_ENDED,
   EVENT_CALL_ENDED,
   SHORT_CALL_THRESHOLD,
 } from '../../constants';
@@ -54,7 +55,7 @@ export class CallEndedHandler implements CallEventHandler {
     // Publish status update
     await publishStatusUpdate({
       callId: endedPayload.callId,
-      status: 'ended',
+      status: CALL_STATUS_ENDED,
       eventType: EVENT_CALL_ENDED,
       timestamp: new Date().toISOString(),
       metadata: { endReason: endedPayload.endReason, duration: endedPayload.duration }

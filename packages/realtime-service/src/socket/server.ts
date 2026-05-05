@@ -12,20 +12,16 @@ export function createSocketServer(httpServer: HttpServer): IoServer {
   });
 
   io.on('connection', (socket) => {
-    console.log(`[ws] client connected ${socket.id}`);
 
     socket.on('subscribe_call', (_callId) => {
           socket.join(_callId);
-      console.log(`[ws] joined room ${_callId}`);
     });
 
     socket.on('unsubscribe_call', (_callId) => {
           socket.leave(_callId);
-        console.log(`[ws] left room ${_callId}`);
     });
 
     socket.on('disconnect', () => {
-      console.log(`[ws] client disconnected ${socket.id}`);
     });
   });
 

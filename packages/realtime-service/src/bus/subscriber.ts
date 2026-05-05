@@ -13,8 +13,7 @@ export function subscribeToCallUpdates(
       console.log(`Subscribed to ${CHANNEL}`);}
   });
 
-  subscriber.on('message', (_channel, message) => {
-    console.log('Redis event received:', message);
+  subscriber.on('message', (_channel, message) => { 
     try {
       const parsed = JSON.parse(message);
       onUpdate(parsed);

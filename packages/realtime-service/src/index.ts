@@ -19,7 +19,6 @@ createSocketServer(httpServer);
 
 // Wire Redis → Socket.io
 subscribeToCallUpdates((update) => {
-  console.log('Broadcasting update:', update);
   broadcastStatusUpdate(update);
 });
 

@@ -10,6 +10,13 @@ let socket: Socket | null = null;
 export function getSocket(): Socket {
   if (!socket) {
     socket = io(REALTIME_URL, { autoConnect: false });
+    socket.connect();
+    socket.on('connect', () => {
+      console.log('[ws] connected to realtime-service');
+    });
+    socket.on('disconnect', () => {
+      console.log('[ws] disconnected from realtime-service');
+    } );
   }
   return socket;
 }

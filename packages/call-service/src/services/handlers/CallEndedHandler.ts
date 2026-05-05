@@ -1,14 +1,14 @@
 import { CallEventHandler } from './CallEventHandler';
 import {CallEndedPayload, EventPayload} from '@voycelink/contracts';
-import { CallEvent } from '../../../domain/call';
-import { CallRepository } from '../../../db/callRepository';
+import { CallEvent } from '../../domain/call';
+import { CallRepository } from '../../db/callRepository';
 import { v4 as uuidv4 } from 'uuid';
-import { publishStatusUpdate } from '../../../bus/publisher';
+import { publishStatusUpdate } from '../../bus/publisher';
 import {
   EVENT_CALL_ENDED,
   SHORT_CALL_THRESHOLD,
-} from '../../../constants';
-import { CallNotFoundError } from '../../../errors';
+} from '../../constants';
+import { CallNotFoundError } from '../../errors';
 
 export class CallEndedHandler implements CallEventHandler {
   constructor(private callRepository: CallRepository) {}

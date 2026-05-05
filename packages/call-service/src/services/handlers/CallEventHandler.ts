@@ -1,6 +1,6 @@
-import { EventPayload } from '../../../domain/call';
-import { CallEvent } from '../../../domain/call';
-import { CallRepository } from '../../../db/callRepository';
+import { EventPayload } from '../../domain/call';
+import { CallEvent } from '../../domain/call';
+import { CallRepository } from '../../db/callRepository';
 
 export interface CallEventHandler {
   canHandle(eventType: string): boolean;

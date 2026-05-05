@@ -1,18 +1,18 @@
 import { CallEventHandler } from './CallEventHandler';
 import {CallInitiatedPayload, EventPayload} from '@voycelink/contracts';
-import { CallEvent } from '../../../domain/call';
-import { CallRepository } from '../../../db/callRepository';
+import { CallEvent } from '../../domain/call';
+import { CallRepository } from '../../db/callRepository';
 import { v4 as uuidv4 } from 'uuid';
-import { publishStatusUpdate } from '../../../bus/publisher';
+import { publishStatusUpdate } from '../../bus/publisher';
 import {
   CALL_STATUS_WAITING,
   EVENT_CALL_INITIATED,
   VALID_QUEUES,
-} from '../../../constants';
+} from '../../constants';
 import {
   CallAlreadyExistsError,
   InvalidQueueIdError,
-} from '../../../errors';
+} from '../../errors';
 
 export class CallInitiatedHandler implements CallEventHandler {
   constructor(private callRepository: CallRepository) {}

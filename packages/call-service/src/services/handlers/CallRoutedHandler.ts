@@ -1,14 +1,14 @@
 import { CallEventHandler } from './CallEventHandler';
 import {CallRoutedPayload, EventPayload} from '@voycelink/contracts';
-import { CallEvent } from '../../../domain/call';
-import { CallRepository } from '../../../db/callRepository';
+import { CallEvent } from '../../domain/call';
+import { CallRepository } from '../../db/callRepository';
 import { v4 as uuidv4 } from 'uuid';
-import { publishStatusUpdate } from '../../../bus/publisher';
+import { publishStatusUpdate } from '../../bus/publisher';
 import {
   CALL_STATUS_ACTIVE,
   EVENT_CALL_ROUTED,
-} from '../../../constants';
-import { CallNotFoundError } from '../../../errors';
+} from '../../constants';
+import { CallNotFoundError } from '../../errors';
 
 export class CallRoutedHandler implements CallEventHandler {
   constructor(private callRepository: CallRepository) {}

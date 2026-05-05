@@ -1,15 +1,15 @@
 import { CallEventHandler } from './CallEventHandler';
 import {CallAnsweredPayload, EventPayload} from '@voycelink/contracts';
-import { CallEvent } from '../../../domain/call';
-import { CallRepository } from '../../../db/callRepository';
+import { CallEvent } from '../../domain/call';
+import { CallRepository } from '../../db/callRepository';
 import { v4 as uuidv4 } from 'uuid';
-import { publishStatusUpdate } from '../../../bus/publisher';
+import { publishStatusUpdate } from '../../bus/publisher';
 import {
   CALL_STATUS_ACTIVE,
   EVENT_CALL_ANSWERED,
   SLA_WAIT_TIME_THRESHOLD,
-} from '../../../constants';
-import { CallNotFoundError } from '../../../errors';
+} from '../../constants';
+import { CallNotFoundError } from '../../errors';
 
 export class CallAnsweredHandler implements CallEventHandler {
   constructor(private callRepository: CallRepository) {}

@@ -1,15 +1,15 @@
 import { CallEventHandler } from './CallEventHandler';
-import { CallHoldPayload } from '@voycelink/contracts';
-import { CallEvent } from '../../../domain/call';
-import { CallRepository } from '../../../db/callRepository';
+import {CallHoldPayload, EventPayload} from '@voycelink/contracts';
+import { CallEvent } from '../../domain/call';
+import { CallRepository } from '../../db/callRepository';
 import { v4 as uuidv4 } from 'uuid';
-import { publishStatusUpdate } from '../../../bus/publisher';
+import { publishStatusUpdate } from '../../bus/publisher';
 import {
   CALL_STATUS_ON_HOLD,
   EVENT_CALL_HOLD,
   MAX_HOLD_TIME_THRESHOLD,
-} from '../../../constants';
-import { CallNotFoundError } from '../../../errors';
+} from '../../constants';
+import { CallNotFoundError } from '../../errors';
 
 export class CallHoldHandler implements CallEventHandler {
   constructor(private callRepository: CallRepository) {}

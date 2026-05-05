@@ -30,10 +30,32 @@ export class CallService implements CallServiceContract {
   }
 
   async getCalls(filters: CallFilters): Promise<Call[]> {
-    return this.callRepository.getCalls(filters);
+    const rows = await this.callRepository.getCalls(filters);
+    return rows.map(row => new Call(
+      row.id,
+      row.type,
+      row.status,
+      row.queueId,
+      row.startTime,
+      row.endTime,
+      row.holdStartTime
+    ));
   }
 
   async getCallEvents(callId: string): Promise<CallEvent[]> {
-    return this.callRepository.getCallEvents(callId);
+    // First check if call exists
+    const call = await this.callRepository.getCallById(callId);
+    if (!call) {
+      throw new Error('Call not found');
+    }
+    
+    const rows = await this.callRepository.getCallEvents(callId);
+    return rows.map(row => new CallEvent(
+      row.id,
+      row.callId,
+      row.type,
+      row.timestamp,
+      row.metadata
+    ));
   }
 }

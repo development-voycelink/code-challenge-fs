@@ -21,6 +21,7 @@ export class Call {
     public readonly queueId: QueueId,
     public readonly startTime: Date,
     public endTime?: Date,
+    public holdStartTime?: Date,
   ) {}
 }
 

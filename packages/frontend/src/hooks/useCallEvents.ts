@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { CallEvent } from '../types';
-import { MOCK_EVENTS } from '../mocks/data';
+import { fetchCallEvents } from '@/lib/api';
+import { getSocket, subscribeToCall, unsubscribeFromCall } from '@/lib/socket';
 
 /**
  * Returns the event history for a specific call.
@@ -19,13 +20,41 @@ export function useCallEvents(callId: string | null) {
     }
 
     setLoading(true);
-    // TODO: replace with fetchCallEvents(callId)
-    const t = setTimeout(() => {
-      setEvents(MOCK_EVENTS[callId] ?? []);
-      setLoading(false);
-    }, 200);
 
-    return () => clearTimeout(t);
+    async function loadCallEvents() {
+      setLoading(true);
+      try {
+        const data = await fetchCallEvents(callId as string);
+        setEvents(data);
+      } catch (error) {
+        console.error('Error fetching call events:', error);
+        // Optionally set an error state here
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCallEvents();
+  }, [callId]);
+
+  useEffect(() => {
+    if (!callId) {
+      return;
+    }
+
+    const socket = getSocket();
+
+    socket.on('call_status_update', console.log);
+    subscribeToCall(callId);
+
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    return () => {
+      socket.off('call_status_update', console.log);
+      unsubscribeFromCall(callId);
+    };
   }, [callId]);
 
   return { events, loading };

@@ -21,6 +21,7 @@ router.get('/', async (req: Request, res: Response) => {
     const calls = await callService.getCalls(filters);
     res.json(calls);
   } catch (_error) {
+    console.log('Error fetching calls:', _error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

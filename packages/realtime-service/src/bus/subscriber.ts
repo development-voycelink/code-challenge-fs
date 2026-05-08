@@ -6,8 +6,21 @@ const CHANNEL = 'call-status-updates';
 export function subscribeToCallUpdates(
   onUpdate: (update: CallStatusUpdate) => void,
 ): void {
-  // TODO: subscribe to CHANNEL on Redis and call onUpdate for each message
-  void Redis;
-  void CHANNEL;
-  void onUpdate;
+  const redisUrl = process.env.REDIS_URL;
+  const subscriber = new Redis(redisUrl as string);
+
+  subscriber.on('message', (channel, message) => {
+    if (channel !== CHANNEL) return;
+
+    try {
+      const payload = JSON.parse(message) as CallStatusUpdate;
+      onUpdate(payload);
+    } catch (error) {
+      console.error('[redis] failed to parse call update:', error);
+    }
+  });
+
+  subscriber.subscribe(CHANNEL).catch((error) => {
+    console.error(`[redis] failed to subscribe to ${CHANNEL}:`, error);
+  });
 }

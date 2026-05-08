@@ -13,8 +13,10 @@ export default function DashboardPage() {
   const [filters, setFilters] = useState<CallFilters>({ status: 'all' });
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
 
-  const { calls, loading } = useCalls(filters);
+  const { calls, loading, isConnected } = useCalls(filters);
   const { events, loading: eventsLoading } = useCallEvents(selectedCallId);
+
+  // console.log({ events, eventsLoading })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -26,10 +28,9 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-500">Call Center Dashboard</p>
           </div>
 
-          {/* TODO: show green dot + "Live" text when Socket.io is connected */}
-          <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
-            <span className="w-2 h-2 rounded-full bg-gray-300" />
-            Not connected
+          <span className={`inline-flex items-center gap-1.5 text-xs ${isConnected ? 'text-emerald-600' : 'text-gray-400'}`}>
+            <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+            {isConnected ? 'Live' : 'Not connected'}
           </span>
         </div>
       </header>

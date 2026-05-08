@@ -21,6 +21,8 @@ router.post('/', apiKeyAuth, async (req: Request, res: Response) => {
       return;
     }
 
+    console.log('Error processing event:', error);
+
     res.status(500).json({ message: 'Internal server error' });
   }
 });

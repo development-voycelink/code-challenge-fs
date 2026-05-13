@@ -7,6 +7,10 @@ services:
       dockerfile: infra/docker/Dockerfile.dev
     volumes:
       - ../../packages/call-service/src:/app/packages/call-service/src
+      - ../../packages/call-service/drizzle.config.ts:/app/packages/call-service/drizzle.config.ts
+      - ../../packages/call-service/drizzle:/app/packages/call-service/drizzle
+      - ../../packages/call-service/nodemon.json:/app/packages/call-service/nodemon.json
+      - ../../packages/call-service/tsconfig.json:/app/packages/call-service/tsconfig.json
     env_file:
       - ../../packages/call-service/.env
     environment:
@@ -29,6 +33,8 @@ services:
       dockerfile: infra/docker/Dockerfile.dev
     volumes:
       - ../../packages/realtime-service/src:/app/packages/realtime-service/src
+      - ../../packages/realtime-service/nodemon.json:/app/packages/realtime-service/nodemon.json
+      - ../../packages/realtime-service/tsconfig.json:/app/packages/realtime-service/tsconfig.json
     env_file:
       - ../../packages/realtime-service/.env
     environment:

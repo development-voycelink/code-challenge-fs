@@ -21,6 +21,12 @@ app.use((req, res, next) => {
 app.use("/api/events", eventsRouter);
 app.use("/api/calls", callsRouter);
 
-app.get("/health", (_req, res) => res.json({ status: "ok" }));
+app.get("/health", (_req, res) =>
+  res.json({
+    status: "ok",
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  }),
+);
 
 export { app };

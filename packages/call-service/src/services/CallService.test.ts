@@ -90,7 +90,7 @@ function makeCallRepo(overrides: Partial<CallRepository> = {}): CallRepository {
     findCallById: vi.fn().mockResolvedValue(null),
     createCall: vi.fn().mockResolvedValue(undefined),
     updateCallStatus: vi.fn().mockResolvedValue(undefined),
-    listCalls: vi.fn().mockResolvedValue([]),
+    listCalls: vi.fn().mockResolvedValue({ data: [], total: 0 }),
     ...overrides,
   } as unknown as CallRepository;
 }
@@ -101,7 +101,7 @@ function makeEventRepo(
   return {
     recordEvent: vi.fn().mockResolvedValue(undefined),
     listEventsForCall: vi.fn().mockResolvedValue([]),
-    hasEventOfTypeForCall: vi.fn().mockResolvedValue(false),
+    findEventByTypeForCall: vi.fn().mockResolvedValue(null),
     ...overrides,
   } as unknown as CallEventRepository;
 }
@@ -163,8 +163,7 @@ describe("CallService", () => {
         new Date(),
       );
       eventRepo = makeEventRepo({
-        hasEventOfTypeForCall: vi.fn().mockResolvedValue(true),
-        listEventsForCall: vi.fn().mockResolvedValue([existingEvent]),
+        findEventByTypeForCall: vi.fn().mockResolvedValue(existingEvent),
       });
       service = new CallService(callRepo, eventRepo);
 
@@ -380,15 +379,16 @@ describe("CallService", () => {
   });
 
   describe("getCalls", () => {
-    it("delegates to callRepo.listCalls", async () => {
+    it("delegates to callRepo.listCalls and returns paginated result", async () => {
       const mockCalls = [makeExistingCall()];
       callRepo = makeCallRepo({
-        listCalls: vi.fn().mockResolvedValue(mockCalls),
+        listCalls: vi.fn().mockResolvedValue({ data: mockCalls, total: 1 }),
       });
       service = new CallService(callRepo, eventRepo);
 
       const result = await service.getCalls({});
-      expect(result).toBe(mockCalls);
+      expect(result.data).toBe(mockCalls);
+      expect(result.total).toBe(1);
     });
   });
 

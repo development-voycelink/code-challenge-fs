@@ -22,7 +22,7 @@ The repository includes a dashboard shell plus scaffolding for the backend and r
 ```
 
 | Package | Purpose |
-|---|---|
+| --- | --- |
 | `packages/frontend` | Dashboard UI for live calls and event history |
 | `packages/call-service` | REST API, business rules, persistence, event publishing |
 | `packages/realtime-service` | Redis subscriber and Socket.io fan-out layer |
@@ -33,6 +33,7 @@ Infrastructure for PostgreSQL and Redis is provided through Docker Compose.
 ## Scaffolding
 
 The repo ships with:
+
 - Express skeletons for `call-service` and `realtime-service` — routes, middleware, DB pool, and Redis client wired up but service logic unimplemented
 - Next.js dashboard shell — components, hooks, and API/socket client stubs in place, currently rendering mock data
 - Shared types and Zod validation in `packages/contracts`
@@ -62,6 +63,7 @@ call_initiated -> call_routed -> call_answered -> [call_hold] -> call_ended
 4. Write unit tests around the business logic and at least one integration test for event ingestion.
 
 Constraints:
+
 - TypeScript throughout.
 - Keep the multi-service architecture and PostgreSQL + Redis in the flow.
 - No full auth system needed.
@@ -71,10 +73,10 @@ Constraints:
 
 ```bash
 # 1. Install dependencies
-npm install
+pnpm install
 
 # 2. Start infrastructure
-npm run infra:up
+pnpm run infra:up
 
 # 3. Copy env files
 cp packages/call-service/.env.example packages/call-service/.env
@@ -83,18 +85,18 @@ cp packages/frontend/.env.local.example packages/frontend/.env.local
 
 # 4. Initialize the database schema
 cd packages/call-service
-npm run db:init
+pnpm run db:init
 cd ../..
 
 # 5. Start the app
-npm run dev
+pnpm run dev
 ```
 
 | Service | URL |
-|---|---|
-| Dashboard | http://localhost:3000 |
-| call-service API | http://localhost:3001 |
-| realtime-service WS | http://localhost:3002 |
+| --- | --- |
+| Dashboard | <http://localhost:3000> |
+| call-service API | <http://localhost:3001> |
+| realtime-service WS | <http://localhost:3002> |
 
 ## API
 
@@ -108,10 +110,10 @@ npm run dev
 Vitest and Supertest are already installed in `call-service`. Run tests with:
 
 ```bash
-npm test --workspace=packages/call-service
+pnpm --filter call-service test
 # or from inside the package
-npm test
-npm run test:watch
+pnpm test
+pnpm run test:watch
 ```
 
 Placeholder test files are in `src/services/CallService.test.ts` and `src/routes/events.test.ts`.
@@ -126,7 +128,7 @@ Placeholder test files are in `src/services/CallService.test.ts` and `src/routes
 ## Evaluation
 
 | Area | What strong signals look like |
-|---|---|
+| --- | --- |
 | Ownership | Improves the system intentionally, not just the happy path |
 | Domain modeling | Clean event handling, sensible state transitions, clear contracts |
 | Distributed systems | Correct pub/sub flow, targeted realtime fan-out, reasonable failure thinking |

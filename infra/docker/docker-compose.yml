@@ -1,3 +1,5 @@
+name: voycelink-code-challenge-fs
+
 services:
   call-service:
     build:

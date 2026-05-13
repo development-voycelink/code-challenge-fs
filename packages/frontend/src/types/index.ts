@@ -1,7 +1,4 @@
-export {
-  CALL_STATUSES,
-  SUPPORTED_QUEUES,
-} from '@voycelink/contracts';
+export { CALL_STATUSES, SUPPORTED_QUEUES } from "@voycelink/contracts";
 
 export type {
   Call,
@@ -11,5 +8,6 @@ export type {
   CallStatusUpdate,
   CallType,
   EventPayload,
+  PaginatedResult,
   QueueId,
-} from '@voycelink/contracts';
+} from "@voycelink/contracts";

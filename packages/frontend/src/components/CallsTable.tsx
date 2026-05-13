@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { Call } from '../types';
-import { StatusBadge } from './StatusBadge';
+import { useState, useEffect } from "react";
+import { Call } from "../types";
+import { StatusBadge } from "./StatusBadge";
 
 interface Props {
   calls: Call[];
@@ -10,29 +11,47 @@ interface Props {
   loading: boolean;
 }
 
-function elapsed(start: string, end?: string): string {
-  const ms = (end ? new Date(end) : new Date()).getTime() - new Date(start).getTime();
-  const s = Math.floor(ms / 1000);
+function elapsed(start: string, end: string | undefined, now: number): string {
+  const ms = (end ? new Date(end).getTime() : now) - new Date(start).getTime();
+  const s = Math.max(0, Math.floor(ms / 1000));
   return `${Math.floor(s / 60)}m ${s % 60}s`;
 }
 
 function timeOf(iso: string): string {
   return new Date(iso).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   });
 }
 
-const HEADERS = ['Call ID', 'Type', 'Queue', 'Status', 'Duration', 'Started'];
+const HEADERS = ["Call ID", "Type", "Queue", "Status", "Duration", "Started"];
 
-export function CallsTable({ calls, selectedCallId, onSelectCall, loading }: Props) {
+export function CallsTable({
+  calls,
+  selectedCallId,
+  onSelectCall,
+  loading,
+}: Props) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   if (loading) {
-    return <div className="py-16 text-center text-sm text-gray-400">Loading…</div>;
+    return (
+      <div className="py-16 text-center text-sm text-gray-400">Loading…</div>
+    );
   }
 
   if (calls.length === 0) {
-    return <div className="py-16 text-center text-sm text-gray-400">No calls found.</div>;
+    return (
+      <div className="py-16 text-center text-sm text-gray-400">
+        No calls found.
+      </div>
+    );
   }
 
   return (
@@ -56,19 +75,23 @@ export function CallsTable({ calls, selectedCallId, onSelectCall, loading }: Pro
               key={call.id}
               onClick={() => onSelectCall(call.id)}
               className={`cursor-pointer transition-colors hover:bg-blue-50 ${
-                selectedCallId === call.id ? 'bg-blue-50' : ''
+                selectedCallId === call.id ? "bg-blue-50" : ""
               }`}
             >
               <td className="px-4 py-3 font-mono text-gray-700">{call.id}</td>
-              <td className="px-4 py-3 capitalize text-gray-600">{call.type}</td>
+              <td className="px-4 py-3 capitalize text-gray-600">
+                {call.type}
+              </td>
               <td className="px-4 py-3 text-gray-600">{call.queueId}</td>
               <td className="px-4 py-3">
                 <StatusBadge status={call.status} />
               </td>
               <td className="px-4 py-3 text-gray-600">
-                {elapsed(call.startTime, call.endTime)}
+                {elapsed(call.startTime, call.endTime, now)}
               </td>
-              <td className="px-4 py-3 text-gray-500">{timeOf(call.startTime)}</td>
+              <td className="px-4 py-3 text-gray-500">
+                {timeOf(call.startTime)}
+              </td>
             </tr>
           ))}
         </tbody>

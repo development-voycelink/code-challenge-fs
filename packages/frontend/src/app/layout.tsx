@@ -1,9 +1,10 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: 'VoyceLink | Call Center',
-  description: 'Real-time call center dashboard',
+  title: "VoyceLink | Call Center",
+  description: "Real-time call center dashboard",
 };
 
 export default function RootLayout({
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

@@ -1,0 +1,87 @@
+name: voycelink-code-challenge-fs
+
+services:
+  call-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.call-service
+    env_file:
+      - ../../packages/call-service/.env
+    environment:
+      DATABASE_URL: postgresql://voycelink:secret@postgres:5432/calls_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  realtime-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.realtime-service
+    env_file:
+      - ../../packages/realtime-service/.env
+    environment:
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+      call-service:
+        condition: service_healthy
+    ports:
+      - "3002:3002"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.frontend
+    env_file:
+      - ../../packages/frontend/.env.local
+    depends_on:
+      call-service:
+        condition: service_healthy
+      realtime-service:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: voycelink
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: calls_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voycelink"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

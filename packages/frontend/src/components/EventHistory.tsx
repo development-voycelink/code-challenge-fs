@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { CallEvent } from '../types';
+import { CallEvent } from "../types";
 
 interface Props {
   callId: string | null;
@@ -10,19 +10,19 @@ interface Props {
 }
 
 const EVENT_LABELS: Record<string, string> = {
-  call_initiated:  'Call Initiated',
-  call_routed:     'Routed to Agent',
-  call_answered:   'Answered',
-  call_hold:       'Placed on Hold',
-  call_retransfer: 'Retransferred',
-  call_ended:      'Call Ended',
+  call_initiated: "Call Initiated",
+  call_routed: "Routed to Agent",
+  call_answered: "Answered",
+  call_hold: "Placed on Hold",
+  call_retransfer: "Retransferred",
+  call_ended: "Call Ended",
 };
 
 function timeOf(iso: string): string {
   return new Date(iso).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   });
 }
 
@@ -30,7 +30,9 @@ export function EventHistory({ callId, events, loading, onClose }: Props) {
   if (!callId) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-6 h-full flex items-center justify-center">
-        <p className="text-sm text-gray-400">Select a call to view its event history.</p>
+        <p className="text-sm text-gray-400">
+          Select a call to view its event history.
+        </p>
       </div>
     );
   }
@@ -39,7 +41,7 @@ export function EventHistory({ callId, events, loading, onClose }: Props) {
     <div className="bg-white rounded-lg border border-gray-200 p-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold text-gray-700">
-          Event History{' '}
+          Event History{" "}
           <span className="font-mono text-gray-500">{callId}</span>
         </h2>
         <button
@@ -51,9 +53,7 @@ export function EventHistory({ callId, events, loading, onClose }: Props) {
         </button>
       </div>
 
-      {loading && (
-        <p className="text-sm text-gray-400">Loading events…</p>
-      )}
+      {loading && <p className="text-sm text-gray-400">Loading events…</p>}
 
       {!loading && events.length === 0 && (
         <p className="text-sm text-gray-400">No events recorded yet.</p>
@@ -65,7 +65,9 @@ export function EventHistory({ callId, events, loading, onClose }: Props) {
             <li key={event.id} className="flex gap-3">
               <div className="flex-shrink-0 mt-1.5 w-2 h-2 rounded-full bg-blue-400" />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-400">{timeOf(event.timestamp)}</p>
+                <p className="text-xs text-gray-400">
+                  {timeOf(event.timestamp)}
+                </p>
                 <p className="text-sm font-medium text-gray-800">
                   {EVENT_LABELS[event.type] ?? event.type}
                 </p>

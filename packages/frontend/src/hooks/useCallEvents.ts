@@ -1,32 +1,39 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { CallEvent } from '../types';
-import { MOCK_EVENTS } from '../mocks/data';
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { CallStatusUpdate } from "../types";
+import { fetchCallEvents } from "../lib/api";
+import { getSocket } from "../lib/socket";
 
-/**
- * Returns the event history for a specific call.
- * TODO: replace mock data with a real API call.
- */
 export function useCallEvents(callId: string | null) {
-  const [events, setEvents] = useState<CallEvent[]>([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
+  // Invalidate the events list whenever this call gets a status update.
   useEffect(() => {
-    if (!callId) {
-      setEvents([]);
-      return;
-    }
+    if (!callId) return;
+    const socket = getSocket();
 
-    setLoading(true);
-    // TODO: replace with fetchCallEvents(callId)
-    const t = setTimeout(() => {
-      setEvents(MOCK_EVENTS[callId] ?? []);
-      setLoading(false);
-    }, 200);
+    const handleUpdate = (update: CallStatusUpdate) => {
+      if (update.callId === callId) {
+        queryClient.invalidateQueries({ queryKey: ["callEvents", callId] });
+      }
+    };
 
-    return () => clearTimeout(t);
-  }, [callId]);
+    socket.on("call_status_update", handleUpdate);
+    return () => {
+      socket.off("call_status_update", handleUpdate);
+    };
+  }, [callId, queryClient]);
 
-  return { events, loading };
+  const query = useQuery({
+    queryKey: ["callEvents", callId],
+    queryFn: () => fetchCallEvents(callId!),
+    enabled: !!callId,
+  });
+
+  return {
+    events: query.data ?? [],
+    loading: query.isLoading,
+  };
 }

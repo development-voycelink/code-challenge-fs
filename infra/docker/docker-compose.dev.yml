@@ -1,0 +1,95 @@
+name: voycelink-code-challenge-fs-dev
+
+services:
+  call-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.dev
+    volumes:
+      - ../../packages/call-service/src:/app/packages/call-service/src
+      - ../../packages/call-service/drizzle.config.ts:/app/packages/call-service/drizzle.config.ts
+      - ../../packages/call-service/drizzle:/app/packages/call-service/drizzle
+      - ../../packages/call-service/nodemon.json:/app/packages/call-service/nodemon.json
+      - ../../packages/call-service/tsconfig.json:/app/packages/call-service/tsconfig.json
+    env_file:
+      - ../../packages/call-service/.env
+    environment:
+      DATABASE_URL: postgresql://voycelink:secret@postgres:5432/calls_db
+      REDIS_URL: redis://redis:6379
+      CHOKIDAR_USEPOLLING: "true"
+    command: sh -c "pnpm --filter call-service db:init && pnpm --filter call-service dev"
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  realtime-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.dev
+    volumes:
+      - ../../packages/realtime-service/src:/app/packages/realtime-service/src
+      - ../../packages/realtime-service/nodemon.json:/app/packages/realtime-service/nodemon.json
+      - ../../packages/realtime-service/tsconfig.json:/app/packages/realtime-service/tsconfig.json
+    env_file:
+      - ../../packages/realtime-service/.env
+    environment:
+      REDIS_URL: redis://redis:6379
+      CHOKIDAR_USEPOLLING: "true"
+    command: pnpm --filter realtime-service dev
+    ports:
+      - "3002:3002"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.dev
+    volumes:
+      - ../../packages/frontend:/app/packages/frontend
+      # Preserve the image's node_modules and Next.js cache inside the container
+      - /app/packages/frontend/node_modules
+      - /app/packages/frontend/.next
+    env_file:
+      - ../../packages/frontend/.env.local
+    environment:
+      WATCHPACK_POLLING: "true"
+    command: pnpm --filter frontend dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      - call-service
+      - realtime-service
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: voycelink
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: calls_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voycelink"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

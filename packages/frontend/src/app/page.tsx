@@ -1,20 +1,22 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { CallFilters } from '../types';
-import { useCalls } from '../hooks/useCalls';
-import { useCallEvents } from '../hooks/useCallEvents';
-import { StatsBar } from '../components/StatsBar';
-import { FilterBar } from '../components/FilterBar';
-import { CallsTable } from '../components/CallsTable';
-import { EventHistory } from '../components/EventHistory';
+import { useState } from "react";
+import { CallFilters } from "../types";
+import { useCalls } from "../hooks/useCalls";
+import { useCallEvents } from "../hooks/useCallEvents";
+import { useSocketStatus } from "../hooks/useSocketStatus";
+import { StatsBar } from "../components/StatsBar";
+import { FilterBar } from "../components/FilterBar";
+import { CallsTable } from "../components/CallsTable";
+import { EventHistory } from "../components/EventHistory";
 
 export default function DashboardPage() {
-  const [filters, setFilters] = useState<CallFilters>({ status: 'all' });
+  const [filters, setFilters] = useState<CallFilters>({ status: "all" });
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
 
-  const { calls, loading } = useCalls(filters);
+  const { calls, loading, error } = useCalls(filters);
   const { events, loading: eventsLoading } = useCallEvents(selectedCallId);
+  const socketStatus = useSocketStatus();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -26,16 +28,25 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-500">Call Center Dashboard</p>
           </div>
 
-          {/* TODO: show green dot + "Live" text when Socket.io is connected */}
           <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
-            <span className="w-2 h-2 rounded-full bg-gray-300" />
-            Not connected
+            <span
+              className={`w-2 h-2 rounded-full ${
+                socketStatus === "connected" ? "bg-green-500" : "bg-gray-300"
+              }`}
+            />
+            {socketStatus === "connected" ? "Live" : "Not connected"}
           </span>
         </div>
       </header>
 
       {/* ── Main ───────────────────────────────────────────── */}
       <main className="max-w-7xl mx-auto px-6 py-6 space-y-5">
+        {error && (
+          <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            Failed to load calls: {error.message}
+          </div>
+        )}
+
         {/* Stats */}
         <StatsBar calls={calls} />
 

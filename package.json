@@ -2,19 +2,28 @@
   "name": "voycelink-challenge",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.0.0",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently --names \"frontend,call-service,realtime-service\" --prefix-colors \"cyan,yellow,green\" \"npm run dev --workspace=packages/frontend\" \"npm run dev --workspace=packages/call-service\" \"npm run dev --workspace=packages/realtime-service\"",
-    "build": "npm run build --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev": "concurrently --names \"frontend,call-service,realtime-service\" --prefix-colors \"cyan,yellow,green\" \"pnpm --filter frontend dev\" \"pnpm --filter call-service dev\" \"pnpm --filter realtime-service dev\"",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
     "lint": "eslint packages --ext .js,.ts,.tsx",
-    "test": "npm run test --workspaces --if-present",
-    "check": "npm run lint && npm run typecheck && npm run test",
-    "infra:up": "docker compose up -d",
-    "infra:down": "docker compose down",
-    "setup": "npm install && docker compose up -d"
+    "test": "pnpm -r --if-present test",
+    "check": "pnpm run lint && pnpm run typecheck && pnpm run test",
+    "infra:up": "docker compose -f infra/docker/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker/docker-compose.yml down",
+    "infra:dev": "docker compose -f infra/docker/docker-compose.dev.yml up --build",
+    "infra:dev:down": "docker compose -f infra/docker/docker-compose.dev.yml down",
+    "setup": "pnpm install && docker compose -f infra/docker/docker-compose.yml up -d"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "unrs-resolver"
+    ]
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.32.1",

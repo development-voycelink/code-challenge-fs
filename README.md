@@ -71,12 +71,39 @@ Constraints:
 
 ## Setup
 
+### Option A: Docker-first (recommended)
+
+Run the full stack (frontend, call-service, realtime-service, postgres, redis):
+
+```bash
+# Copy env files
+cp packages/call-service/.env.example packages/call-service/.env
+cp packages/realtime-service/.env.example packages/realtime-service/.env
+cp packages/frontend/.env.local.example packages/frontend/.env.local
+
+# Build and start everything
+pnpm run infra:up
+
+# Stop everything
+pnpm run infra:down
+```
+
+Then open:
+
+- Dashboard: <http://localhost:3000>
+- call-service API: <http://localhost:3001>
+- realtime-service WS: <http://localhost:3002>
+
+### Option B: Local app processes + Docker infra
+
+If you prefer to run app processes directly on your machine:
+
 ```bash
 # 1. Install dependencies
 pnpm install
 
-# 2. Start infrastructure
-pnpm run infra:up
+# 2. Start only infra services
+docker compose -f infra/docker/docker-compose.yml up -d postgres redis
 
 # 3. Copy env files
 cp packages/call-service/.env.example packages/call-service/.env

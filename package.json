@@ -13,9 +13,9 @@
     "lint": "eslint packages --ext .js,.ts,.tsx",
     "test": "pnpm -r --if-present test",
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test",
-    "infra:up": "docker compose up -d",
-    "infra:down": "docker compose down",
-    "setup": "pnpm install && docker compose up -d"
+    "infra:up": "docker compose -f infra/docker/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker/docker-compose.yml down",
+    "setup": "pnpm install && docker compose -f infra/docker/docker-compose.yml up -d"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

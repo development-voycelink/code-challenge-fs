@@ -50,7 +50,7 @@ call_initiated -> call_routed -> call_answered -> [call_hold] -> call_ended
 ```
 
 | Event | Rules |
-|---|---|
+| --- | --- |
 | `call_initiated` | Validate `queueId` exists. Start SLA timer with 30 second max wait. |
 | `call_routed` | Assign an agent. Re-route if unanswered after 15 seconds. |
 | `call_answered` | Flag or notify when `waitTime > 30`. Update agent-facing metadata as needed. |

@@ -1,26 +1,54 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Call, CallFilters } from '../types';
-import { MOCK_CALLS } from '../mocks/data';
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Call, CallFilters, CallStatusUpdate } from "../types";
+import { fetchCalls } from "../lib/api";
+import { getSocket, subscribeToCall, unsubscribeFromCall } from "../lib/socket";
 
-/**
- * Returns the live call list and a loading indicator.
- * TODO: replace mock data with real API + Socket.io updates.
- */
-export function useCalls(_filters: CallFilters) {
-  const [calls, setCalls] = useState<Call[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useCalls(filters: CallFilters) {
+  const queryClient = useQueryClient();
 
+  const query = useQuery({
+    queryKey: ["calls", filters],
+    queryFn: () => fetchCalls(filters),
+  });
+
+  // Subscribe to each visible call and patch the cache on status updates.
   useEffect(() => {
-    // TODO: replace with fetchCalls(_filters) + socket subscription
-    const t = setTimeout(() => {
-      setCalls(MOCK_CALLS);
-      setLoading(false);
-    }, 300);
+    const socket = getSocket();
+    socket.connect();
 
-    return () => clearTimeout(t);
-  }, []);
+    const calls = queryClient.getQueryData<Call[]>(["calls", filters]) ?? [];
+    calls.forEach((c) => subscribeToCall(c.id));
 
-  return { calls, loading, setCalls };
+    const handleUpdate = (update: CallStatusUpdate) => {
+      queryClient.setQueryData<Call[]>(["calls", filters], (old = []) =>
+        old.map((c) =>
+          c.id === update.callId
+            ? {
+                ...c,
+                status: update.status,
+                ...(update.status === "ended"
+                  ? { endTime: update.timestamp }
+                  : {}),
+              }
+            : c,
+        ),
+      );
+    };
+
+    socket.on("call_status_update", handleUpdate);
+
+    return () => {
+      calls.forEach((c) => unsubscribeFromCall(c.id));
+      socket.off("call_status_update", handleUpdate);
+    };
+  }, [filters, queryClient]);
+
+  return {
+    calls: query.data ?? [],
+    loading: query.isLoading,
+    error: query.error,
+  };
 }

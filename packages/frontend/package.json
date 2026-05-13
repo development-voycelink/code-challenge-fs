@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.100.10",
     "@voycelink/contracts": "*",
     "next": "^14.2.3",
     "react": "^18.3.1",

@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/contracts/package.json packages/contracts/package.json
+COPY packages/call-service/package.json packages/call-service/package.json
+COPY packages/realtime-service/package.json packages/realtime-service/package.json
+COPY packages/frontend/package.json packages/frontend/package.json
+
+RUN pnpm install --frozen-lockfile
+
+# Build contracts so ts-node can resolve @voycelink/contracts at runtime.
+# Source mounts (below) only cover each service's src/ — contracts dist stays in the image.
+COPY packages/contracts ./packages/contracts
+RUN pnpm --filter @voycelink/contracts build

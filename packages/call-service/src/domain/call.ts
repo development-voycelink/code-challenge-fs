@@ -4,7 +4,7 @@ import type {
   CallType,
   EventPayload,
   QueueId,
-} from '@voycelink/contracts';
+} from "@voycelink/contracts";
 
 export type { CallStatus, CallStatusUpdate, CallType, EventPayload, QueueId };
 

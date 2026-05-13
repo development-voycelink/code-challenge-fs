@@ -1,8 +1,8 @@
-import { io, Socket } from 'socket.io-client';
-import { CallStatusUpdate } from '../types';
+import { io, Socket } from "socket.io-client";
+import { CallStatusUpdate } from "../types";
 
 const REALTIME_URL =
-  process.env.NEXT_PUBLIC_REALTIME_SERVICE_URL ?? 'http://localhost:3002';
+  process.env.NEXT_PUBLIC_REALTIME_SERVICE_URL ?? "http://localhost:3002";
 
 let socket: Socket | null = null;
 
@@ -16,12 +16,12 @@ export function getSocket(): Socket {
 
 /** Subscribe to real-time updates for a specific call room. */
 export function subscribeToCall(callId: string): void {
-  getSocket().emit('subscribe_call', callId);
+  getSocket().emit("subscribe_call", callId);
 }
 
 /** Unsubscribe from a specific call room. */
 export function unsubscribeFromCall(callId: string): void {
-  getSocket().emit('unsubscribe_call', callId);
+  getSocket().emit("unsubscribe_call", callId);
 }
 
 export type { CallStatusUpdate };

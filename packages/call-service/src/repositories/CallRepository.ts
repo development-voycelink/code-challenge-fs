@@ -1,9 +1,9 @@
-import { eq, and } from 'drizzle-orm';
-import type { CallStatus, QueueId } from '@voycelink/contracts';
-import { db } from '../db/client';
-import { callsTable } from '../db/schema';
-import { Call } from '../domain/call';
-import type { CallFilters } from '../domain/call';
+import { eq, and } from "drizzle-orm";
+import type { CallStatus, QueueId } from "@voycelink/contracts";
+import { db } from "../db/client";
+import { callsTable } from "../db/schema";
+import { Call } from "../domain/call";
+import type { CallFilters } from "../domain/call";
 
 export class CallRepository {
   async findCallById(id: string): Promise<Call | null> {
@@ -15,7 +15,14 @@ export class CallRepository {
 
     const row = rows[0];
     if (!row) return null;
-    return new Call(row.id, row.type, row.status, row.queueId as QueueId, row.startTime, row.endTime ?? undefined);
+    return new Call(
+      row.id,
+      row.type,
+      row.status,
+      row.queueId as QueueId,
+      row.startTime,
+      row.endTime ?? undefined,
+    );
   }
 
   async createCall(call: Call): Promise<void> {
@@ -29,7 +36,11 @@ export class CallRepository {
     });
   }
 
-  async updateCallStatus(id: string, status: CallStatus, endTime?: Date): Promise<void> {
+  async updateCallStatus(
+    id: string,
+    status: CallStatus,
+    endTime?: Date,
+  ): Promise<void> {
     await db
       .update(callsTable)
       .set({ status, ...(endTime ? { endTime } : {}) })
@@ -42,12 +53,24 @@ export class CallRepository {
       filters.queueId ? eq(callsTable.queueId, filters.queueId) : undefined,
     ].filter(Boolean);
 
-    const rows = conditions.length > 0
-      ? await db.select().from(callsTable).where(and(...(conditions as Parameters<typeof and>)))
-      : await db.select().from(callsTable);
+    const rows =
+      conditions.length > 0
+        ? await db
+            .select()
+            .from(callsTable)
+            .where(and(...(conditions as Parameters<typeof and>)))
+        : await db.select().from(callsTable);
 
     return rows.map(
-      (row) => new Call(row.id, row.type, row.status, row.queueId as QueueId, row.startTime, row.endTime ?? undefined),
+      (row) =>
+        new Call(
+          row.id,
+          row.type,
+          row.status,
+          row.queueId as QueueId,
+          row.startTime,
+          row.endTime ?? undefined,
+        ),
     );
   }
 }

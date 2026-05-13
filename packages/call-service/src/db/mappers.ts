@@ -1,10 +1,10 @@
-import type { QueueId } from '@voycelink/contracts';
-import { Call, CallEvent } from '../domain/call';
+import type { QueueId } from "@voycelink/contracts";
+import { Call, CallEvent } from "../domain/call";
 
 export interface CallRow {
   id: string;
-  type: Call['type'];
-  status: Call['status'];
+  type: Call["type"];
+  status: Call["status"];
   queue_id: QueueId;
   start_time: Date;
   end_time: Date | null;

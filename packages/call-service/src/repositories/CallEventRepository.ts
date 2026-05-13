@@ -1,7 +1,7 @@
-import { eq, asc, and } from 'drizzle-orm';
-import { db } from '../db/client';
-import { callEventsTable } from '../db/schema';
-import { CallEvent } from '../domain/call';
+import { eq, asc, and } from "drizzle-orm";
+import { db } from "../db/client";
+import { callEventsTable } from "../db/schema";
+import { CallEvent } from "../domain/call";
 
 export class CallEventRepository {
   async recordEvent(event: CallEvent): Promise<void> {
@@ -37,7 +37,9 @@ export class CallEventRepository {
     const rows = await db
       .select({ id: callEventsTable.id })
       .from(callEventsTable)
-      .where(and(eq(callEventsTable.callId, callId), eq(callEventsTable.type, type)))
+      .where(
+        and(eq(callEventsTable.callId, callId), eq(callEventsTable.type, type)),
+      )
       .limit(1);
 
     return rows.length > 0;

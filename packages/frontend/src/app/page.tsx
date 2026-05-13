@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { CallFilters } from '../types';
-import { useCalls } from '../hooks/useCalls';
-import { useCallEvents } from '../hooks/useCallEvents';
-import { useSocketStatus } from '../hooks/useSocketStatus';
-import { StatsBar } from '../components/StatsBar';
-import { FilterBar } from '../components/FilterBar';
-import { CallsTable } from '../components/CallsTable';
-import { EventHistory } from '../components/EventHistory';
+import { useState } from "react";
+import { CallFilters } from "../types";
+import { useCalls } from "../hooks/useCalls";
+import { useCallEvents } from "../hooks/useCallEvents";
+import { useSocketStatus } from "../hooks/useSocketStatus";
+import { StatsBar } from "../components/StatsBar";
+import { FilterBar } from "../components/FilterBar";
+import { CallsTable } from "../components/CallsTable";
+import { EventHistory } from "../components/EventHistory";
 
 export default function DashboardPage() {
-  const [filters, setFilters] = useState<CallFilters>({ status: 'all' });
+  const [filters, setFilters] = useState<CallFilters>({ status: "all" });
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
 
   const { calls, loading, error } = useCalls(filters);
@@ -31,10 +31,10 @@ export default function DashboardPage() {
           <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
             <span
               className={`w-2 h-2 rounded-full ${
-                socketStatus === 'connected' ? 'bg-green-500' : 'bg-gray-300'
+                socketStatus === "connected" ? "bg-green-500" : "bg-gray-300"
               }`}
             />
-            {socketStatus === 'connected' ? 'Live' : 'Not connected'}
+            {socketStatus === "connected" ? "Live" : "Not connected"}
           </span>
         </div>
       </header>

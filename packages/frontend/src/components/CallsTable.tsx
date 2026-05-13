@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Call } from '../types';
-import { StatusBadge } from './StatusBadge';
+import { Call } from "../types";
+import { StatusBadge } from "./StatusBadge";
 
 interface Props {
   calls: Call[];
@@ -11,28 +11,40 @@ interface Props {
 }
 
 function elapsed(start: string, end?: string): string {
-  const ms = (end ? new Date(end) : new Date()).getTime() - new Date(start).getTime();
+  const ms =
+    (end ? new Date(end) : new Date()).getTime() - new Date(start).getTime();
   const s = Math.floor(ms / 1000);
   return `${Math.floor(s / 60)}m ${s % 60}s`;
 }
 
 function timeOf(iso: string): string {
   return new Date(iso).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   });
 }
 
-const HEADERS = ['Call ID', 'Type', 'Queue', 'Status', 'Duration', 'Started'];
+const HEADERS = ["Call ID", "Type", "Queue", "Status", "Duration", "Started"];
 
-export function CallsTable({ calls, selectedCallId, onSelectCall, loading }: Props) {
+export function CallsTable({
+  calls,
+  selectedCallId,
+  onSelectCall,
+  loading,
+}: Props) {
   if (loading) {
-    return <div className="py-16 text-center text-sm text-gray-400">Loading…</div>;
+    return (
+      <div className="py-16 text-center text-sm text-gray-400">Loading…</div>
+    );
   }
 
   if (calls.length === 0) {
-    return <div className="py-16 text-center text-sm text-gray-400">No calls found.</div>;
+    return (
+      <div className="py-16 text-center text-sm text-gray-400">
+        No calls found.
+      </div>
+    );
   }
 
   return (
@@ -56,11 +68,13 @@ export function CallsTable({ calls, selectedCallId, onSelectCall, loading }: Pro
               key={call.id}
               onClick={() => onSelectCall(call.id)}
               className={`cursor-pointer transition-colors hover:bg-blue-50 ${
-                selectedCallId === call.id ? 'bg-blue-50' : ''
+                selectedCallId === call.id ? "bg-blue-50" : ""
               }`}
             >
               <td className="px-4 py-3 font-mono text-gray-700">{call.id}</td>
-              <td className="px-4 py-3 capitalize text-gray-600">{call.type}</td>
+              <td className="px-4 py-3 capitalize text-gray-600">
+                {call.type}
+              </td>
               <td className="px-4 py-3 text-gray-600">{call.queueId}</td>
               <td className="px-4 py-3">
                 <StatusBadge status={call.status} />
@@ -68,7 +82,9 @@ export function CallsTable({ calls, selectedCallId, onSelectCall, loading }: Pro
               <td className="px-4 py-3 text-gray-600">
                 {elapsed(call.startTime, call.endTime)}
               </td>
-              <td className="px-4 py-3 text-gray-500">{timeOf(call.startTime)}</td>
+              <td className="px-4 py-3 text-gray-500">
+                {timeOf(call.startTime)}
+              </td>
             </tr>
           ))}
         </tbody>

@@ -62,12 +62,8 @@
           "name": "call_events_call_id_calls_id_fk",
           "tableFrom": "call_events",
           "tableTo": "calls",
-          "columnsFrom": [
-            "call_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["call_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -166,20 +162,12 @@
     "public.call_status": {
       "name": "call_status",
       "schema": "public",
-      "values": [
-        "waiting",
-        "active",
-        "on_hold",
-        "ended"
-      ]
+      "values": ["waiting", "active", "on_hold", "ended"]
     },
     "public.call_type": {
       "name": "call_type",
       "schema": "public",
-      "values": [
-        "voice",
-        "video"
-      ]
+      "values": ["voice", "video"]
     }
   },
   "schemas": {},

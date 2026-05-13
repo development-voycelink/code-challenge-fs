@@ -1,8 +1,8 @@
-import { CallRepository } from '../repositories/CallRepository';
-import { CallEventRepository } from '../repositories/CallEventRepository';
-import { CallService } from './CallService';
+import { CallRepository } from "../repositories/CallRepository";
+import { CallEventRepository } from "../repositories/CallEventRepository";
+import { CallService } from "./CallService";
 
-export { CallService } from './CallService';
+export { CallService } from "./CallService";
 
 const callRepo = new CallRepository();
 const eventRepo = new CallEventRepository();

@@ -1,4 +1,4 @@
-import type { CallStatusUpdate } from '@voycelink/contracts';
+import type { CallStatusUpdate } from "@voycelink/contracts";
 
 export type { CallStatusUpdate };
 

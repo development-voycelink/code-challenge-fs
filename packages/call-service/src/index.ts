@@ -1,5 +1,5 @@
-import { config } from './config';
-import { app } from './app';
+import { config } from "./config";
+import { app } from "./app";
 
 app.listen(config.port, () => {
   console.log(`call-service  →  http://localhost:${config.port}`);

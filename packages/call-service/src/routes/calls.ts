@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import type { QueueId } from '@voycelink/contracts';
 import type { CallFilters, CallStatus } from '../domain/call';
+import { NotFoundError } from '../domain/errors';
 import { callService } from '../services';
 
 const router = Router();
@@ -29,7 +30,11 @@ router.get('/:id/events', async (req: Request, res: Response) => {
   try {
     const events = await callService.getCallEvents(req.params.id);
     res.json(events);
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ message: error.message });
+      return;
+    }
     res.status(500).json({ message: 'Internal server error' });
   }
 });

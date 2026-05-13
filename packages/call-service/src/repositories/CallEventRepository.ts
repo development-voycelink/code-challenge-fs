@@ -33,15 +33,26 @@ export class CallEventRepository {
     );
   }
 
-  async hasEventOfTypeForCall(callId: string, type: string): Promise<boolean> {
+  async findEventByTypeForCall(
+    callId: string,
+    type: string,
+  ): Promise<CallEvent | null> {
     const rows = await db
-      .select({ id: callEventsTable.id })
+      .select()
       .from(callEventsTable)
       .where(
         and(eq(callEventsTable.callId, callId), eq(callEventsTable.type, type)),
       )
       .limit(1);
 
-    return rows.length > 0;
+    const row = rows[0];
+    if (!row) return null;
+    return new CallEvent(
+      row.id,
+      row.callId,
+      row.type,
+      row.timestamp,
+      (row.metadata as Record<string, unknown>) ?? undefined,
+    );
   }
 }

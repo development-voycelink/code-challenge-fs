@@ -55,14 +55,11 @@ export class CallService implements CallServiceContract {
   private async handleCallInitiated(
     payload: CallInitiatedPayload,
   ): Promise<CallEvent> {
-    const alreadyExists = await this.eventRepo.hasEventOfTypeForCall(
+    const existing = await this.eventRepo.findEventByTypeForCall(
       payload.callId,
-      "call_initiated",
+      payload.event,
     );
-    if (alreadyExists) {
-      const events = await this.eventRepo.listEventsForCall(payload.callId);
-      return events[0]!;
-    }
+    if (existing) return existing;
 
     const call = new Call(
       payload.callId,
@@ -94,6 +91,12 @@ export class CallService implements CallServiceContract {
   private async handleCallRouted(
     payload: CallRoutedPayload,
   ): Promise<CallEvent> {
+    const existing = await this.eventRepo.findEventByTypeForCall(
+      payload.callId,
+      payload.event,
+    );
+    if (existing) return existing;
+
     const call = await this.callRepo.findCallById(payload.callId);
     if (!call) throw new NotFoundError(`Call ${payload.callId} not found`);
 
@@ -130,6 +133,12 @@ export class CallService implements CallServiceContract {
   private async handleCallAnswered(
     payload: CallAnsweredPayload,
   ): Promise<CallEvent> {
+    const existing = await this.eventRepo.findEventByTypeForCall(
+      payload.callId,
+      payload.event,
+    );
+    if (existing) return existing;
+
     const call = await this.callRepo.findCallById(payload.callId);
     if (!call) throw new NotFoundError(`Call ${payload.callId} not found`);
 
@@ -164,6 +173,12 @@ export class CallService implements CallServiceContract {
   }
 
   private async handleCallHold(payload: CallHoldPayload): Promise<CallEvent> {
+    const existing = await this.eventRepo.findEventByTypeForCall(
+      payload.callId,
+      payload.event,
+    );
+    if (existing) return existing;
+
     const call = await this.callRepo.findCallById(payload.callId);
     if (!call) throw new NotFoundError(`Call ${payload.callId} not found`);
 
@@ -200,6 +215,12 @@ export class CallService implements CallServiceContract {
   }
 
   private async handleCallEnded(payload: CallEndedPayload): Promise<CallEvent> {
+    const existing = await this.eventRepo.findEventByTypeForCall(
+      payload.callId,
+      payload.event,
+    );
+    if (existing) return existing;
+
     const call = await this.callRepo.findCallById(payload.callId);
     if (!call) throw new NotFoundError(`Call ${payload.callId} not found`);
 

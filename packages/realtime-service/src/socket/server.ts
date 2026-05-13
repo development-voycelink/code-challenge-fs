@@ -38,3 +38,8 @@ export function broadcastStatusUpdate(update: CallStatusUpdate): void {
   if (!io) return;
   io.to(update.callId).emit("call_status_update", update);
 }
+
+export function broadcastNewCall(update: CallStatusUpdate): void {
+  if (!io) return;
+  io.emit("new_call", update);
+}

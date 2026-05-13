@@ -2,7 +2,11 @@ import "dotenv/config";
 import http from "http";
 import express from "express";
 import cors from "cors";
-import { createSocketServer, broadcastStatusUpdate } from "./socket/server";
+import {
+  createSocketServer,
+  broadcastStatusUpdate,
+  broadcastNewCall,
+} from "./socket/server";
 import { subscribeToCallUpdates } from "./bus/subscriber";
 
 const app = express();
@@ -19,7 +23,11 @@ createSocketServer(httpServer);
 
 // Wire Redis → Socket.io
 subscribeToCallUpdates((update) => {
-  broadcastStatusUpdate(update);
+  if (update.eventType === "call_initiated") {
+    broadcastNewCall(update);
+  } else {
+    broadcastStatusUpdate(update);
+  }
 });
 
 httpServer.listen(PORT, () => {

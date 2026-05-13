@@ -8,6 +8,8 @@ export type { CallStatusUpdate };
 export interface ServerToClientEvents {
   /** Fires whenever a call's status changes. */
   call_status_update: (update: CallStatusUpdate) => void;
+  /** Fires when a new call is initiated — broadcast to all connected clients. */
+  new_call: (update: CallStatusUpdate) => void;
 }
 
 /** Events emitted by clients → received by the server. */

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Call } from "../types";
 import { StatusBadge } from "./StatusBadge";
 
@@ -10,10 +11,9 @@ interface Props {
   loading: boolean;
 }
 
-function elapsed(start: string, end?: string): string {
-  const ms =
-    (end ? new Date(end) : new Date()).getTime() - new Date(start).getTime();
-  const s = Math.floor(ms / 1000);
+function elapsed(start: string, end: string | undefined, now: number): string {
+  const ms = (end ? new Date(end).getTime() : now) - new Date(start).getTime();
+  const s = Math.max(0, Math.floor(ms / 1000));
   return `${Math.floor(s / 60)}m ${s % 60}s`;
 }
 
@@ -33,6 +33,13 @@ export function CallsTable({
   onSelectCall,
   loading,
 }: Props) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   if (loading) {
     return (
       <div className="py-16 text-center text-sm text-gray-400">Loading…</div>
@@ -80,7 +87,7 @@ export function CallsTable({
                 <StatusBadge status={call.status} />
               </td>
               <td className="px-4 py-3 text-gray-600">
-                {elapsed(call.startTime, call.endTime)}
+                {elapsed(call.startTime, call.endTime, now)}
               </td>
               <td className="px-4 py-3 text-gray-500">
                 {timeOf(call.startTime)}

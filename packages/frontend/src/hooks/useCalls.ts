@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Call, CallFilters, CallStatusUpdate } from "../types";
+import { Call, CallFilters, CallStatusUpdate, PaginatedResult } from "../types";
 import { fetchCalls } from "../lib/api";
 import { getSocket, subscribeToCall, unsubscribeFromCall } from "../lib/socket";
 
@@ -14,27 +14,37 @@ export function useCalls(filters: CallFilters) {
     queryFn: () => fetchCalls(filters),
   });
 
-  // Subscribe to each visible call and patch the cache on status updates.
   useEffect(() => {
     const socket = getSocket();
     socket.connect();
 
-    const calls = queryClient.getQueryData<Call[]>(["calls", filters]) ?? [];
+    const cached = queryClient.getQueryData<PaginatedResult<Call>>([
+      "calls",
+      filters,
+    ]);
+    const calls = cached?.data ?? [];
     calls.forEach((c) => subscribeToCall(c.id));
 
     const handleUpdate = (update: CallStatusUpdate) => {
-      queryClient.setQueryData<Call[]>(["calls", filters], (old = []) =>
-        old.map((c) =>
-          c.id === update.callId
-            ? {
-                ...c,
-                status: update.status,
-                ...(update.status === "ended"
-                  ? { endTime: update.timestamp }
-                  : {}),
-              }
-            : c,
-        ),
+      queryClient.setQueryData<PaginatedResult<Call>>(
+        ["calls", filters],
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            data: old.data.map((c) =>
+              c.id === update.callId
+                ? {
+                    ...c,
+                    status: update.status,
+                    ...(update.status === "ended"
+                      ? { endTime: update.timestamp }
+                      : {}),
+                  }
+                : c,
+            ),
+          };
+        },
       );
     };
 
@@ -47,7 +57,9 @@ export function useCalls(filters: CallFilters) {
   }, [filters, queryClient]);
 
   return {
-    calls: query.data ?? [],
+    calls: query.data?.data ?? [],
+    total: query.data?.total ?? 0,
+    totalPages: query.data?.totalPages ?? 1,
     loading: query.isLoading,
     error: query.error,
   };

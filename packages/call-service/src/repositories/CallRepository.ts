@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, count, desc } from "drizzle-orm";
 import type { CallStatus, QueueId } from "@voycelink/contracts";
 import { db } from "../db/client";
 import { callsTable } from "../db/schema";
@@ -47,30 +47,46 @@ export class CallRepository {
       .where(eq(callsTable.id, id));
   }
 
-  async listCalls(filters: CallFilters): Promise<Call[]> {
+  async listCalls(
+    filters: CallFilters,
+  ): Promise<{ data: Call[]; total: number }> {
+    const limit = Math.min(filters.limit ?? 20, 100);
+    const page = Math.max(filters.page ?? 1, 1);
+    const offset = (page - 1) * limit;
+
     const conditions = [
       filters.status ? eq(callsTable.status, filters.status) : undefined,
       filters.queueId ? eq(callsTable.queueId, filters.queueId) : undefined,
-    ].filter(Boolean);
+    ].filter(Boolean) as Parameters<typeof and>;
 
-    const rows =
-      conditions.length > 0
-        ? await db
-            .select()
-            .from(callsTable)
-            .where(and(...(conditions as Parameters<typeof and>)))
-        : await db.select().from(callsTable);
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-    return rows.map(
-      (row) =>
-        new Call(
-          row.id,
-          row.type,
-          row.status,
-          row.queueId as QueueId,
-          row.startTime,
-          row.endTime ?? undefined,
-        ),
-    );
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(callsTable)
+      .where(where);
+
+    const rows = await db
+      .select()
+      .from(callsTable)
+      .where(where)
+      .orderBy(desc(callsTable.startTime))
+      .limit(limit)
+      .offset(offset);
+
+    return {
+      data: rows.map(
+        (row) =>
+          new Call(
+            row.id,
+            row.type,
+            row.status,
+            row.queueId as QueueId,
+            row.startTime,
+            row.endTime ?? undefined,
+          ),
+      ),
+      total: Number(total),
+    };
   }
 }

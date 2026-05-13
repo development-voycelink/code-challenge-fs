@@ -96,4 +96,14 @@ export type EventPayload = z.infer<typeof eventPayloadSchema>;
 export interface CallFilters {
   status?: CallStatus | "all";
   queueId?: QueueId;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }

@@ -11,6 +11,8 @@ export type { CallStatus, CallStatusUpdate, CallType, EventPayload, QueueId };
 export interface CallFilters {
   status?: CallStatus;
   queueId?: QueueId;
+  page?: number;
+  limit?: number;
 }
 
 export class Call {
@@ -36,6 +38,6 @@ export class CallEvent {
 
 export interface CallServiceContract {
   processEvent(payload: EventPayload): Promise<CallEvent>;
-  getCalls(filters: CallFilters): Promise<Call[]>;
+  getCalls(filters: CallFilters): Promise<{ data: Call[]; total: number }>;
   getCallEvents(callId: string): Promise<CallEvent[]>;
 }

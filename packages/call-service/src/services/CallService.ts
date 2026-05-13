@@ -44,7 +44,9 @@ export class CallService implements CallServiceContract {
     }
   }
 
-  async getCalls(filters: CallFilters): Promise<Call[]> {
+  async getCalls(
+    filters: CallFilters,
+  ): Promise<{ data: Call[]; total: number }> {
     return this.callRepo.listCalls(filters);
   }
 

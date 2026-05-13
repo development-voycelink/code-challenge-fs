@@ -1,19 +1,29 @@
-import type { Call, CallEvent, CallFilters, EventPayload } from "../types";
+import type {
+  Call,
+  CallEvent,
+  CallFilters,
+  EventPayload,
+  PaginatedResult,
+} from "../types";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_CALL_SERVICE_URL ?? "http://localhost:3001";
 
-/**
- * Fetch the current call list from call-service.
- * TODO: call this from the `useCalls` hook.
- */
-export async function fetchCalls(params?: CallFilters): Promise<Call[]> {
+export async function fetchCalls(
+  params?: CallFilters,
+): Promise<PaginatedResult<Call>> {
   const queryParams = new URLSearchParams();
   if (params?.status && params.status !== "all") {
     queryParams.set("status", params.status);
   }
   if (params?.queueId) {
     queryParams.set("queueId", params.queueId);
+  }
+  if (params?.page) {
+    queryParams.set("page", String(params.page));
+  }
+  if (params?.limit) {
+    queryParams.set("limit", String(params.limit));
   }
 
   const query = queryParams.toString();

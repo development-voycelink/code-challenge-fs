@@ -8,6 +8,9 @@ const router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+
     const filters: CallFilters = {
       status:
         typeof req.query.status === "string"
@@ -17,10 +20,18 @@ router.get("/", async (req: Request, res: Response) => {
         typeof req.query.queueId === "string"
           ? (req.query.queueId as QueueId)
           : undefined,
+      page,
+      limit,
     };
 
-    const calls = await callService.getCalls(filters);
-    res.json(calls);
+    const { data, total } = await callService.getCalls(filters);
+    res.json({
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (_error) {
     res.status(500).json({ message: "Internal server error" });
   }

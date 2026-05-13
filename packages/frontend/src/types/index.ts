@@ -8,5 +8,6 @@ export type {
   CallStatusUpdate,
   CallType,
   EventPayload,
+  PaginatedResult,
   QueueId,
 } from "@voycelink/contracts";
